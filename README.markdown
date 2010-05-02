@@ -34,13 +34,13 @@ How do I use migrate?
 Once you have the configuration file filled you you can create a new migration
 from the command line:
 
-  node migrate.js create create_users_table
+`node migrate.js create create_users_table`
 
 This command will create a blank migration and stick it in the migrations folder
 that you supplied in the configuration file. Once you fill out the migration's
 up and down functions you can then apply the migration to your schema like so:
 
-  node migrate.js migrate
+`node migrate.js migrate`
 
 That command will determine if there are any migrations that have not been
 applied and apply them sequentially until they are all done or one of them
@@ -48,13 +48,13 @@ fails.
 
 If you wish to roll back any migrations that's super simple too just use:
 
-  node migrate.js rollback
+`node migrate.js rollback`
 
 By default this will roll back only a single migration, but you can provide
 a numeric parameter to tell it how many migrations you'd like it to roll back.
 For instance, here's how you would roll back five migrations:
 
-  node migrate.js rollback 5
+`node migrate.js rollback 5`
 
 What is a migration?
 --------------------------------------------------------------------------------
