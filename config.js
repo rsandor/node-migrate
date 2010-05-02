@@ -38,4 +38,4 @@ exports.db_name = '';
 exports.dbms = 'mysql';
 
 // Path to the migrations directory (relative to migrate)
-exports.migration_path = './migrations/'
+exports.migration_path = ''

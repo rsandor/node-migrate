@@ -136,7 +136,7 @@ Simply drops a table from the schema. Example:
 
 `this.drop_table('high_scores');`
 
-Creating SQL:
+Producing SQL:
 
 `DROP_TABLE high_scores;`
 

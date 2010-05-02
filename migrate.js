@@ -601,9 +601,8 @@ function create() {
       stdout.replace(/\s+$/,"") + "_" + name + ".js";
     fs.writeFile(filename, migration_template.replace(/%name/,name), function(error) {
       if (error) exit(error);
-      sys.puts("Created migration " + filename);
+      exit("Created migration " + filename);
     });
-    exit();
   });
 }
 
