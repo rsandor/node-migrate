@@ -46,7 +46,7 @@ That command will determine if there are any migrations that have not been
 applied and apply them sequentially until they are all done or one of them
 fails.
 
-If you wish to roll back any migrations that's super simple too just use:
+If you wish to roll back any migrations that's super simple too, just use:
 
 `node migrate.js rollback`
 
@@ -61,7 +61,6 @@ What is a migration?
 A migration is a programmatic way of defining incremental database schema 
 changes. It has an "up" method for describing how to apply the changes, and a 
 "down" method for removing them. Here is an example migration:
-
   var create_users_table = new Migration({
     up: function() {
       this.create_table('users', function(t) {
@@ -75,7 +74,6 @@ changes. It has an "up" method for describing how to apply the changes, and a
       this.drop_table('users');
     }
   });
-
 In the above migration the "up" function creates a table named "users" with
 three fields (id, email, and password) and a primary key on id. The "down"
 function reverses these changes and simply drops the entire "users" table.
@@ -115,7 +113,6 @@ and options are as explained in the `t.column` method. Here's a complete list:
   `date`, `binary`, `boolean`
   
 Example:
-
   this.create_table('high_scores', function(t) {
     t.integer('id');
     t.string('name', {limit: 32});
@@ -123,10 +120,8 @@ Example:
     t.datetime('date');
     t.primary_key('id');
     t.index('name');
-  });
-  
+  }); 
 Producing SQL:
-
   CREATE TABLE high_scores (
     id INT,
     name VARCHAR(32),
@@ -139,20 +134,20 @@ Producing SQL:
 ### drop_table(name)
 Simply drops a table from the schema. Example:
 
-  this.drop_table('high_scores');
+`this.drop_table('high_scores');`
 
 Creating SQL:
 
-  DROP_TABLE high_scores;
+`DROP_TABLE high_scores;`
 
 ### rename_table(old_name, new_name)
 Renames a table. Example:
 
-  this.rename_table('high_scores', 'all_time_high_scores');
+`this.rename_table('high_scores', 'all_time_high_scores');`
 
 Producing SQL:
 
-  RENAME TABLE high_scores TO all_time_high_scores;
+`RENAME TABLE high_scores TO all_time_high_scores;`
 
 ### change_table(name, body)
 
@@ -166,7 +161,6 @@ modify existing tables and adds the following functionality to body method:
 * `t.remove_primary_key()` - Removes a primary key from the table.
 
 Example:
-
   this.change_table('all_time_high_scores', function(t) {
     t.remove_index('name');
     t.remove_primary_key();
@@ -179,9 +173,7 @@ Example:
     });
     t.change('name', 'string' {limit: 128});
   });
-
 Producing SQL:
-
   ALTER TABLE all_time_high_scores
     DROP INDEX (name),
     DROP PRIMARY KEY,
@@ -193,69 +185,66 @@ Producing SQL:
 ### add_column(table_name, column_name, type, options)
 Adds a column to a table. Example:
 
-  this.add_column('all_time_high_scores', 'comment', 'string', {limit: 512});
+`this.add_column('all_time_high_scores', 'comment', 'string', {limit: 512});`
 
 Producing SQL:
 
-  ALTER TABLE all_time_high_scores ADD COLUMN comment VARCHAR(512);
+`ALTER TABLE all_time_high_scores ADD COLUMN comment VARCHAR(512);`
 
 ### rename_column(table_name, column_name, new_column)
 Renames and modifies a column in a table. Example:
-
   this.rename('all_time_high_scores', 'high_score', {
     name: 'score',
     type: 'integer',
     limit: 8
   });
-
 Producing SQL:
-
   ALTER TABLE all_time_high_scores CHANGE COLUMN high_score score BIGINT;
 
 ### change_column(table_name, column_name, type, options)
 Changes a column's definition. Example:
 
-  this.change_column('all_time_high_scores', 'comment', 'text');
+`this.change_column('all_time_high_scores', 'comment', 'text');`
 
 Producing SQL:
 
-  ALTER TABLE all_time_high_scores MODIFY COLUMN comment TEXT;
+`ALTER TABLE all_time_high_scores MODIFY COLUMN comment TEXT;`
 
 ### remove_column(table_name, column_name)
 Removes a column from a table. Example:
 
-  this.remove_column('all_time_high_scores', 'date');
+`this.remove_column('all_time_high_scores', 'date');`
 
 Producing SQL:
 
-  ALTER TABLE all_time_high_scores DROP COLUMN date;
+`ALTER TABLE all_time_high_scores DROP COLUMN date;`
 
 ### add_index(table_name, column_name, options)
 Adds an index to a table. Example:
 
-  this.add_index('all_time_high_scores', 'id');
+`this.add_index('all_time_high_scores', 'id');`
 
 Producing SQL:
 
-  ALTER TABLE all_time_high_scores ADD INDEX (id);
+`ALTER TABLE all_time_high_scores ADD INDEX (id);`
 
 ### remove_index(table_name, index_name)
 Removes an index from a table. Example:
 
-  this.remove_index('id');
+`this.remove_index('id');`
 
 Producing SQL:
 
-  ALTER TABLE all_time_high_scores DROP INDEX (id);
+`ALTER TABLE all_time_high_scores DROP INDEX (id);`
 
 ### execute(sql)
 Executes arbitrary SQL. Example:
 
-  this.execute('insert into all_time_high_scores (name, score) values ('Ryan', 100000000);');
+`this.execute('insert into all_time_high_scores (name, score) values ('Ryan', 100000000);');`
 
 Producing SQL:
 
-  insert into all_time_high_scores (name, score) values ('Ryan', 100000000);
+`insert into all_time_high_scores (name, score) values ('Ryan', 100000000);`
 
 Outtro
 --------------------------------------------------------------------------------
