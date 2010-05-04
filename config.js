@@ -22,6 +22,7 @@
  */
  
 // Path to the node-mysql library (relative to migrate)
+// Example: exports.node_mysql_path = '../node-mysql/lib/mysql';
 exports.node_mysql_path = '';
 
 // Host and port
