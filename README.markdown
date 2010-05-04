@@ -34,7 +34,7 @@ The configuration file has the following keys:
 * `node_mysql_path` - This is the path to the node-mysql module (specifically
   the "mysql.js" file provided by the library). This path is relative to the
   directory in which you have installed node-migrate. Here is an example:
-  `noe_mysql_path = '../node-mysql/lib/mysql.js` (note the `.js` is optional).
+  `node_mysql_path = '../node-mysql/lib/mysql.js` (note the `.js` is optional).
 * `host_name` - Host name where your database resides (in most cases this will
   be `localhost`).
 * `port` - Port your database server is running on (keep null for default port).
