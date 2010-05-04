@@ -784,6 +784,37 @@ function main() {
     exit(usage);
 }
  
+/**
+ * Checks provided DBMS driver paths. Returns the modified path if it is possible to derive the
+ * correct path from what was given.
+ */
+function check_path(path, tail) {
+  // Paths cannot be empty and must start with ./
+  if (!path || !path.match(/^\.\/.*/))
+    return false;
+
+  // Trim trailing .js
+  path = path.replace(/\.js\s*/, '');
+  
+  // Trim trailing slash
+  path = path.replace(/\/+\s*$/, '');
+  
+  // Determine if we match on the tail, if not append the tail
+  if (!path.match(tail+'$')) {
+    path += '/' + tail;
+  }
+
+  // Detemine if the path resolves
+  try {
+    return fs.realpathSync(path);
+  }
+  catch(e) {
+    return false;
+  }
+  
+  return true;
+}
+ 
 // Determine if the user has run the script from the command-line and if so
 // attempt to connect to the database and execute the given command.
 if (process.argv[1].split('/').pop() == "migrate.js") {
@@ -793,7 +824,14 @@ if (process.argv[1].split('/').pop() == "migrate.js") {
 
   // Attempt to connect to the DB
   if (config.dbms == 'mysql') {
-    mysql = require(config.node_mysql_path);
+    var node_mysql_path = check_path(config.node_mysql_path, 'mysql');
+    
+    if (!node_mysql_path) {
+      sys.puts("Invalid node-mysql path provided, please set node_mysql_path in config.js.");
+      return;
+    }
+    
+    mysql = require(node_mysql_path);
     conn = new mysql.Connection(
       config.host_name,
       config.user_name,
