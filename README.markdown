@@ -29,6 +29,23 @@ little as long as both migrate.js and config.js are in the same directory and
 the node-mysql and migration paths in the configuration file are relative to
 the directory where the migrate.js file resides.
 
+The configuration file has the following keys:
+
+* `node_mysql_path` - This is the path to the node-mysql module (specifically
+  the "mysql.js" file provided by the library). This path is relative to the
+  directory in which you have installed node-migrate. Here is an example:
+  `noe_mysql_path = '../node-mysql/lib/mysql.js` (note the `.js` is optional).
+* `host_name` - Host name where your database resides (in most cases this will
+  be `localhost`).
+* `port` - Port your database server is running on (keep null for default port).
+* `user_name` - Username for accessing the database server.
+* `password` - Password for accessing the database server.
+* `db_name` - Name of the database you are using.
+* `dbms` - The database management system to use (currently we only support a
+  a value of `'mysql'`).
+* `migration_path` - Relative path to the directory in which migrations are
+  stored.
+
 How do I use migrate?
 --------------------------------------------------------------------------------
 Once you have the configuration file filled you you can create a new migration
