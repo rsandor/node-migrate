@@ -5,16 +5,15 @@ By Ryan Sandor Richards
 
 Introduction
 --------------------------------------------------------------------------------
-Migrate is a tool for Node.js applications that allows for the programmatic 
-definition of database schema changes. It borrows very heavily from the Rails 
-migration system and contains many of the same features. If you are unfamiliar
-with how migrations work don't fret, just read on and everything will be 
-explained!
+Migrate is a tool that allows you to define database schema migrations with
+javascript. It borrows very heavily from the ruby migration system and contains 
+many of the same features. If you are unfamiliar with how migrations work don't 
+fret, just read on and everything will be explained!
 
 Requirements
 --------------------------------------------------------------------------------
 1. Node.js - http://github.com/ry/node
-2. node-mysql - http://github.com/masuidrive/node-mysql
+2. node-mysql - https://github.com/felixge/node-mysql
 
 Please note that at the current time we only support MySQL but other DBMS' are
 on their way (next up: Postgres).
@@ -31,20 +30,13 @@ the directory where the migrate.js file resides.
 
 The configuration file has the following keys:
 
-* `node_mysql_path` - This is the path to the node-mysql module (specifically
-  the "mysql.js" file provided by the library). This path is relative to the
-  directory in which you have installed node-migrate. Here is an example:
-  `node_mysql_path = '../node-mysql/lib/mysql.js` (note the `.js` is optional).
-* `host_name` - Host name where your database resides (in most cases this will
-  be `localhost`).
-* `port` - Port your database server is running on (keep null for default port).
-* `user_name` - Username for accessing the database server.
-* `password` - Password for accessing the database server.
-* `db_name` - Name of the database you are using.
 * `dbms` - The database management system to use (currently we only support a
   a value of `'mysql'`).
 * `migration_path` - Relative path to the directory in which migrations are
   stored.
+* `mysql` - Just a simple client configuration for mysql. Fill out your username,
+  password, and any other information needed to connect to the database via
+  node-mysql's `Client` class.
 
 How do I use migrate?
 --------------------------------------------------------------------------------
@@ -266,9 +258,8 @@ Producing SQL:
 Outtro
 --------------------------------------------------------------------------------
 So that about sums it up. Simple and easy ;). It's a very early alpha version so
-please don't hate on only having MySQL support! Things should be progressing
-super rapidly, so keep an eye out. If you have a feature request feel free to
-send me a message and I'll try to get it in ASAP.
+please don't hate on only having MySQL support! If you have a feature request 
+feel free to send me a message and I'll try to get it in ASAP.
 
 Thanks!
 

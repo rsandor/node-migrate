@@ -1,6 +1,6 @@
 /*
  * migrate.js - A database agnostic migration module for Node.js.
- * Copyright (c) 2010 Ryan Sandor Richards
+ * Copyright (c) 2010 - 2011 Ryan Sandor Richards
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,9 +49,10 @@ function merge(base, ext) {
 
 // Determines if a given type is valid
 function valid_type(type) {
-  for (var i = 0; i < DATA_TYPES.length; i++)
+  for (var i = 0; i < DATA_TYPES.length; i++) {
     if (type == DATA_TYPES[i])
       return true;
+  }
   return false;
 }
 
@@ -102,21 +103,21 @@ function CreateTable(name) {
       return;
       
     this.columns.push(column);
-  }
+  };
 
   // Sets the primary key for the table.
   this.primary_key = function(name) {
     if (!name)
       return;
     this.primary_key_name = name;
-  }
+  };
 
   // Adds an index to the table.
   this.index = function(name, options) {
     if (!name)
       return;
     this.indices.push(name);
-  }
+  };
 
   // Create the typed helper functions for quickly creating columns of
   // any given type (string, text, integer, etc.)
@@ -177,7 +178,7 @@ function ChangeTable(name) {
   this.rename = function(old_name, new_column) {
     this.column(new_column);
     this.rename_columns[old_name] = this.columns.pop();
-  }
+  };
   
   /**
    * Changes the definition of a column.
@@ -185,28 +186,28 @@ function ChangeTable(name) {
   this.change = function() {
     this.column.apply(this, arguments);
     this.change_columns.push(this.columns.pop());
-  }
+  };
   
   /**
    * Removes a column from the table.
    */
   this.remove = function(name) {
     this.remove_columns.push(name);
-  }
+  };
   
   /**
    * Removes an index from the table.
    */
   this.remove_index = function(name) {
     this.remove_indices.push(name);
-  }
+  };
   
   /**
    * Removes the primary key from this table.
    */
   this.remove_primary_key = function() {
     this.remove_key = true;
-  }
+  };
 }
 ChangeTable.prototype = new CreateTable();
 
@@ -217,15 +218,16 @@ function AddColumn(table_name, column_name, type, options) {
   this.table_name = table_name;
   this.name = column_name;
   this.type = type;
-  if (options)
+  if (options) {
     for (var k in options)
       this[k] = options[k];
+  }
 }
 
 /**
  * Rename Column Representation.
  */
-function RenameColumn(table_name, column_name, new_column) {  
+function RenameColumn(table_name, column_name, new_column) {
   this.table_name = table_name;
   this.name = column_name;
   this.new_name = new_column.name;
@@ -242,9 +244,10 @@ function ChangeColumn(table_name, column_name, type, options) {
   this.table_name = table_name;
   this.name = column_name;
   this.type = type;
-  if (options && typeof options == "object")
+  if (options && typeof options == "object") {
     for (var k in options)
       this[k] = options[k];
+  }
 }
 
 /**
@@ -261,9 +264,10 @@ function RemoveColumn(table_name, column_name) {
 function AddIndex(table_name, index_name, options) {
   this.table_name = table_name;
   this.name = index_name;
-  if (options && typeof options == "object")
+  if (options && typeof options == "object") {
     for (var k in options)
       this[k] = options[k];
+  }
 }
 
 /**
@@ -282,7 +286,7 @@ function Migration(opts) {
     
   // Encodes an object and appends it to the migrations SQL representation.
   function encode(o) {
-    sql += encoder.encode(o)
+    sql += encoder.encode(o);
   }
   
   function reset() {
@@ -294,74 +298,74 @@ function Migration(opts) {
     if (body && typeof(body) == 'function') 
       body(rule);
     encode(rule);
-  }
+  };
 
   this.drop_table = function(name) {
     encode(new DropTable(name));
-  }
+  };
   
   this.change_table = function(name, body) {
     var rule = new ChangeTable(name);
     if (body && typeof body == "function")
       body(rule);
     encode(rule);
-  }
+  };
   
   this.rename_table = function(old_name, new_name) {
     encode(new RenameTable(old_name, new_name));
-  }
+  };
   
   this.add_column = function(table_name, column_name, type, options) {
     encode(new AddColumn(table_name, column_name, type, options));
-  }
+  };
 
   this.rename_column = function(table_name, column_name, new_column) {
     encode(new RenameColumn(table_name, column_name, new_column));
-  }
+  };
   
   this.change_column = function(table_name, column_name, type, options) {
     encode(new ChangeColumn(table_name, column_name, type, options));
-  }
+  };
 
   this.remove_column = function(table_name, column_name) {
     encode(new RemoveColumn(table_name, column_name));
-  }
+  };
 
   this.add_index = function(table_name, column_name, options) {
     encode(new AddIndex(table_name, column_name, options));
-  }
+  };
   
   this.remove_index = function(table_name, index_name) {
     encode(new RemoveIndex(table_name, index_name));
-  }
+  };
 
   /**
    * Adds user-defined SQL to the migration.
    */
   this.execute = function(s) {
     sql += s;
-  }
+  };
 
   /**
    * Converts the migration into SQL.
    */
   this.toString = function() {
     return sql;
-  }
+  };
 
   // Migration construction or "up" method
   this.up = function() {
     reset();
     if (opts.up)
       opts.up.apply(this);
-  }
+  };
 
   // Migration destruction or "down" method
   this.down = function() {
     reset();
     if (opts.down)
       opts.down.apply(this);
-  }
+  };
 }
 
 /**
@@ -386,7 +390,7 @@ Encoders['mysql'] = function() {
     'date': 'DATE',
     'binary': 'VARBINARY',
     'boolean': 'TINYINT'
-  }
+  };
    
   // Intensely helpful function for creating a MySQL type from a column object.
   function parse_type(column) {
@@ -442,22 +446,23 @@ Encoders['mysql'] = function() {
    * The following functions do the the actual work of generating the SQL for the encode function.
    */
   function create_table(table) {
-    var sql = "CREATE TABLE " + table.name;
-    var defs = [];
+    var sql = "CREATE TABLE " + table.name, defs = [], i;
     
-    for (var i=0; i < table.columns.length; i++)
+    for (i = 0; i < table.columns.length; i++)
       defs.push("\t" + table.columns[i].name + " " + parse_type(table.columns[i]));
 
-    for (var i=0; i < table.indices.length; i++)
-      defs.push("\tADD INDEX (" + table.indices[i] + ")");
-    
     if (table.primary_key_name)
       defs.push("\tPRIMARY KEY (" + table.primary_key_name + ")");
 
     if (defs.length)
       sql += " (\n" + defs.join(",\n") + "\n)";
     
-    return sql + ";\n";
+    sql += ";\n";
+  
+    for (i = 0; i < table.indices.length; i++)
+      sql += "ALTER TABLE " + table.name + " ADD INDEX (" + table.indices[i]+ ");\n";
+
+    return sql;
   }
   
   function drop_table(table) {
@@ -469,28 +474,27 @@ Encoders['mysql'] = function() {
   }
   
   function change_table(table) {
-    var sql = "ALTER TABLE " + table.name;
-    var defs = [];
+    var sql = "ALTER TABLE " + table.name, defs = [], i;
     
-    for (var i=0; i < table.columns.length; i++)
+    for (i = 0; i < table.columns.length; i++)
       defs.push("\tADD COLUMN " + table.columns[i].name + " " + parse_type(table.columns[i]));
     
-    for (var i=0; i < table.indices.length; i++)
+    for (i = 0; i < table.indices.length; i++)
       defs.push("\tADD INDEX(" + table.indices[i] + ")");
 
     if (table.primary_key_name)
       defs.push("\tADD PRIMARY KEY(" + table.primary_key_name + ")");
 
-    for (var i=0; i < table.remove_columns.length; i++)
+    for (i = 0; i < table.remove_columns.length; i++)
       defs.push("\tDROP COLUMN " + table.remove_columns[i]);
     
     if (table.remove_key)
       defs.push("\tDROP PRIMARY KEY");
     
-    for (var i=0; i < table.remove_indices.length; i++)
+    for (i = 0; i < table.remove_indices.length; i++)
       defs.push("\tDROP INDEX " + table.remove_indices[i]);
 
-    for (var i=0; i < table.change_columns.length; i++)
+    for (i = 0; i < table.change_columns.length; i++)
       defs.push("\tMODIFY COLUMN " + table.change_columns[i].name + " " + parse_type(table.change_columns[i]));
       
     for (var name in table.rename_columns) {
@@ -556,7 +560,7 @@ Encoders['mysql'] = function() {
       else
         throw "Error: MySQL Encoder Encountered Unknown Rule Type.";
     }
-  }
+  };
 }();
 
 // The real "beef" is here, this section handles the command-line usage of the module.
@@ -564,19 +568,28 @@ var sys = require('sys'),
   exec = require('child_process').exec,
   fs = require('fs'),
   config = require('./config');
-var encoder, mysql, conn;  
+  
+var encoder, mysql, client;
 
-var usage = "migrate.js usage:\n" +
-  "\tnode migrate.js create <name> - Create a new migration with the given name\n" +
-  "\tnode migrate.js migrate - Run pending migrations\n" +
-  "\tnode migrate.js rollback [n] - Roll back by a number of migrations.";
+// Usage text
+var usage = [
+  "migrate.js usage:",
+  "\tnode migrate.js create <name> - Create a new migration with the given name",
+  "\tnode migrate.js migrate - Run pending migrations",
+  "\tnode migrate.js rollback [n] - Roll back by a number of migrations."
+].join("\n");
+  
 
-var migration_template = "var %name = new Migration({\n" +
-  "  up: function() {\n" +
-  "  },\n" + 
-  "  down: function() {\n" +
-  "  }\n" + 
+// Migration template (for generating new migrations)
+var migration_template = [
+  "var %name = new Migration({",
+  "\tup: function() {",
+  "\t},", 
+  "\tdown: function() {",
+  "\t}", 
   "});"
+].join("\n");
+
 
 /**
  * Gracefully exits the script and closes any open DB connections.
@@ -584,8 +597,8 @@ var migration_template = "var %name = new Migration({\n" +
 function exit(msg) {
   if (msg)
     sys.puts(msg);
-  if (conn)
-    conn.close();
+  if (client)
+    client.end();
 }
 
 /**
@@ -616,33 +629,30 @@ function fetch_migration_info(callback) {
     files.pop();
     
     if (files.length == 0) {
-      return exit("Schema up-to-date.");
+      exit("Schema up-to-date.");
+      return;
     }
-    
-    conn.query(
-      "select * from schema_migrations;", 
-      function(result) {
-        var migration_index = -1;
-        // Find the index of the last migration
-        if (result.records.length > 0) {
-          migration_index = -1;
-          var last_migration = result.records[0][0];
-          for (var i = 0; i < files.length; i++) {
-            if (files[i].match(last_migration)) {
-              migration_index = i;
-              break;
-            }
+
+    client.query("select * from schema_migrations;", function(err, result) {
+      if (err) return exit(err);
+      
+      var migration_index = -1;
+      
+      // Find the index of the last migration
+      if (result.length > 0) {
+        var last_migration = result[0][0];
+        for (var i = 0; i < files.length; i++) {
+          if (files[i].match(last_migration)) {
+            migration_index = i;
+            break;
           }
-          if (migration_index == -1) {
-            return exit('Could not locate last schema migration (' + last_migration + ').');
-          }
-        } 
-        callback(files, migration_index+1);
-      },
-      function(error) {
-        return exit(error.message);
-      }
-    );
+        }
+        if (migration_index == -1) {
+          return exit('Could not locate last schema migration (' + last_migration + ').'); 
+        }
+      } 
+      return callback(files, migration_index+1);
+    });  
   });
 }
 
@@ -659,17 +669,12 @@ function multi_query(sql, callback, error) {
   function exec_query(index) {
     if (index >= queries.length) {
       callback();
-      return;
     }
-    conn.query(
-      queries[index], 
-      function(response) {
-        exec_query(index+1);
-      },
-      function(err) {
-        error(err);
-      }
-    );
+    else {
+      client.query(queries[index], function(err) {
+        return (err) ? exit(err) : exec_query(index+1);
+      });
+    }
   };
   exec_query(0);
 }
@@ -684,34 +689,37 @@ function execute_migration(file, callback, down) {
   var variable = parts.join('_');
   var filename = config.migration_path.replace(/[\/\s]+$/,"") + "/" + file;
   
-  fs.readFile(filename, function(err, data) {
-    if (err) return exit("Error reading migration " + file);
-    eval(data);
-    var migration = eval(variable);
-    
-    sys.puts("======================================")
-    
-    if (!down) {
-      migration.up();
-      sys.puts("Executing " + file);
-    }
+  fs.readFile(filename, 'utf8', function(err, data) {
+    if (err) 
+      exit("Error reading migration " + file);
     else {
-      migration.down();
-      sys.puts("Rolling back " + file);
-    }
-  
-    sys.puts(migration);
-    
-    multi_query(
-      migration.toString(), 
-      function(result) {
-        sys.puts("Success!");
-        callback();
-      },
-      function(error) {
-        exit(error.message);
+      eval(data);
+      var migration = eval(variable);
+
+      sys.puts("======================================");
+
+      if (!down) {
+        migration.up();
+        sys.puts("Executing " + file);
       }
-    );
+      else {
+        migration.down();
+        sys.puts("Rolling back " + file);
+      }
+
+      sys.puts(migration);
+
+      multi_query(
+        migration.toString(), 
+        function(result) {
+          sys.puts("Success!");
+          callback();
+        },
+        function(error) {
+          exit(error.message);
+        }
+      );
+    }
   });
 }
 
@@ -726,8 +734,8 @@ function migrate() {
         return;
       }
       execute_migration(files[index], function() { 
-        conn.query("delete from schema_migrations;");
-        conn.query("insert into schema_migrations (version) values (" + files[index].split('_')[0] + ");");
+        client.query("delete from schema_migrations;");
+        client.query("insert into schema_migrations (version) values (" + files[index].split('_')[0] + ");");
         sync_migrate(index+1, callback); 
       });
     }
@@ -747,25 +755,28 @@ function rollback() {
   
   fetch_migration_info(function(files, migration_index) {
     if (migration_index == 0)
-      return exit('No migrations to roll back.');
-    
-    function roll(index, callback) {
-      if (m >= n || index < 0)
-        return callback();
-      m++;
-      execute_migration(files[index], function() {
-        conn.query("delete from schema_migrations;");
-        if (index > 0) 
-          conn.query("insert into schema_migrations (version) values (" + files[index-1].split('_')[0] + ");");
-        roll(index-1, callback); 
-      }, true);
+      exit('No migrations to roll back.');
+    else {
+      function roll(index, callback) {
+        if (m >= n || index < 0)
+          callback();
+        else {
+          m++;
+          execute_migration(files[index], function() {
+            client.query("delete from schema_migrations;");
+            if (index > 0) 
+              client.query("insert into schema_migrations (version) values (" + files[index-1].split('_')[0] + ");");
+            roll(index-1, callback); 
+          }, true);
+        }
+      }
+
+      sys.puts(migration_index-1);
+
+      roll(migration_index-1, function() {
+        exit("Schema rolled back by " + m + " migration" + ((m > 1) ? 's' : '') + '.');
+      });
     }
-    
-    sys.puts(migration_index-1);
-    
-    roll(migration_index-1, function() {
-      exit("Schema rolled back by " + m + " migration" + ((m > 1) ? 's' : '') + '.');
-    });
   });
 }
 
@@ -814,7 +825,37 @@ function check_path(path, tail) {
   
   return true;
 }
- 
+
+
+/**
+ * Handles connecting to the DB for various dbms
+ */
+var Connect = {
+  mysql: function() {
+    // Create the client
+    client = new require('mysql').Client(config.mysql);
+    
+    // Attempt to connect to the db
+    client.connect();
+    
+    client.query("show tables;", function(err, result, fields) {
+      if (err) 
+        return exit(err);
+      
+      // Look for the migrations table
+      while (result.length) {
+        if (result.pop()['Tables_in_' + config.mysql.database] == "schema_migrations")
+          return main();
+      }
+      
+      // If not found then create it!
+      sys.puts("Creating migration table.");
+      client.query("create table schema_migrations (version BIGINT);");
+      return main();
+    });
+  }
+};
+
 // Determine if the user has run the script from the command-line and if so
 // attempt to connect to the database and execute the given command.
 if (process.argv[1].split('/').pop() == "migrate.js") {
@@ -823,59 +864,7 @@ if (process.argv[1].split('/').pop() == "migrate.js") {
   encoder = Encoders[config.dbms];
 
   // Attempt to connect to the DB
-  if (config.dbms == 'mysql') {
-    var node_mysql_path = check_path(config.node_mysql_path, 'mysql');
-    
-    if (!node_mysql_path) {
-      sys.puts("Invalid node-mysql path provided, please set node_mysql_path in config.js.");
-      return;
-    }
-    
-    mysql = require(node_mysql_path);
-    conn = new mysql.Connection(
-      config.host_name,
-      config.user_name,
-      config.password,
-      config.db_name,
-      config.port);  
-    conn.connect(
-      function() {
-        // Check for migrations table
-        conn.query("show tables;", function(result) {
-          var found = false;
-          for (var i = 0; i < result.records.length; i++) {
-            if (result.records[i][0] == "schema_migrations") {
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            sys.puts("Creating migration table.");
-            conn.query("create table schema_migrations (version BIGINT);",
-              function(result) {
-                main();
-              },
-              function(error) {
-                sys.puts('An error occured while creating he migration table.');
-                sys.puts(error.message);
-                conn.close();
-              }
-            );
-          }
-          else
-            main();
-        },
-        function (error) {
-          sys.puts('An error occurred while attempting to check for the migration table.');
-          sys.puts(error.message);
-          conn.close();
-        });
-      }, 
-      function(error) {
-        sys.puts("Error connecting to the database: " + error.message);
-      }
-    );
-  }
+  Connect[config.dbms]();
 }
 
 // "BURNING DOWN THE HOUSE!"
