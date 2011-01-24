@@ -794,38 +794,6 @@ function main() {
   else
     exit(usage);
 }
- 
-/**
- * Checks provided DBMS driver paths. Returns the modified path if it is possible to derive the
- * correct path from what was given.
- */
-function check_path(path, tail) {
-  // Paths cannot be empty and must start with ./
-  if (!path || !path.match(/^\.\/.*/))
-    return false;
-
-  // Trim trailing .js
-  path = path.replace(/\.js\s*/, '');
-  
-  // Trim trailing slash
-  path = path.replace(/\/+\s*$/, '');
-  
-  // Determine if we match on the tail, if not append the tail
-  if (!path.match(tail+'$')) {
-    path += '/' + tail;
-  }
-
-  // Detemine if the path resolves
-  try {
-    return fs.realpathSync(path);
-  }
-  catch(e) {
-    return false;
-  }
-  
-  return true;
-}
-
 
 /**
  * Handles connecting to the DB for various dbms
