@@ -74,7 +74,8 @@ function CreateTable(name) {
       not_null: null,
       precision: null,
       scale: null,
-      default_value: null
+      default_value: null,
+      auto_increment: null
     };
     
     if (arguments.length < 1)
@@ -87,8 +88,9 @@ function CreateTable(name) {
       column.name = arguments[0];
       column.type = arguments[1];
       
-      if (arguments[2] && typeof(arguments[2]) == "object")
+      if (arguments[2] && typeof(arguments[2]) == "object")        
         column = merge(column, arguments[2]);
+            
     }
     else if (typeof arguments[0] == 'object') {
       column = merge(column, arguments[0]);
@@ -393,7 +395,7 @@ Encoders['mysql'] = function() {
   };
    
   // Intensely helpful function for creating a MySQL type from a column object.
-  function parse_type(column) {
+  function parse_type(column) {    
     // type, limit, precision, scale
     var type = null;
     
@@ -431,6 +433,10 @@ Encoders['mysql'] = function() {
     if (column.not_null)
       type += ' NOT NULL';
     
+    if (column.auto_increment) {      
+      type += ' AUTO_INCREMENT';
+    }
+    
     if (column.default_value) {
       type += ' DEFAULT ';
       if (column.type == 'string' || column.type == 'text')
@@ -449,7 +455,7 @@ Encoders['mysql'] = function() {
     var sql = "CREATE TABLE " + table.name, defs = [], i;
     
     for (i = 0; i < table.columns.length; i++)
-      defs.push("\t" + table.columns[i].name + " " + parse_type(table.columns[i]));
+      defs.push("\t" + table.columns[i].name + " " + parse_type(table.columns[i]));                
 
     if (table.primary_key_name)
       defs.push("\tPRIMARY KEY (" + table.primary_key_name + ")");
