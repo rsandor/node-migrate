@@ -640,7 +640,13 @@ function fetch_migration_info(callback) {
       
       // Find the index of the last migration
       if (result.length > 0) {
-        var last_migration = result[0][0];
+        var last_migration;
+        if (result[0].version) {
+          last_migration = result[0].version;
+        } else {
+          last_migration = result[0][0];
+        }
+
         for (var i = 0; i < files.length; i++) {
           if (files[i].match(last_migration)) {
             migration_index = i;
