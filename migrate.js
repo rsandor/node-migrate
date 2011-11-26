@@ -37,7 +37,6 @@ var DATA_TYPES = [
   'binary',
   'boolean'
 ];
-
 // Handy options merging function
 function merge(base, ext) {
   var rv = {};
@@ -807,10 +806,8 @@ function main() {
 var Connect = {
   mysql: function() {
     // Create the client
-    client = new require('mysql').Client(config.mysql);
-    
-    // Attempt to connect to the db
-    client.connect();
+    mysql = require('mysql');
+    client = mysql.createClient(config.mysql);
     
     client.query("show tables;", function(err, result, fields) {
       if (err) 
@@ -832,12 +829,13 @@ var Connect = {
 
 // Determine if the user has run the script from the command-line and if so
 // attempt to connect to the database and execute the given command.
-if (process.argv[1].split('/').pop() == "migrate.js") {
+if (process.argv[1].split('\\').pop() == "migrate.js" || process.argv[1].split('/').pop() == "migrate.js") {
   if (!Encoders[config.dbms])
     sys.puts("Invalid dbms set in configuraiton file.");
   encoder = Encoders[config.dbms];
 
   // Attempt to connect to the DB
+
   Connect[config.dbms]();
 }
 
