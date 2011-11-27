@@ -72,6 +72,7 @@ function CreateTable(name) {
 			limit: null,
 			not_null: null,
 			precision: null,
+            auto_increment: null,
 			scale: null,
 			default_value: null
 		};
@@ -438,6 +439,12 @@ Encoders['mysql'] = function() {
 				type += column.default_value;
 		}
 		
+        if (column.auto_increment) {
+            if (column.type == 'integer') {
+                type += ' AUTO_INCREMENT';
+            }
+        }
+        
 		return type;
 	}
 	
