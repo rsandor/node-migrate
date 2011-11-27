@@ -852,7 +852,7 @@ var Connect = {
 			
 			// If not found then create it!
 			sys.puts("Creating migration table.");
-			client.query("create table schema_migrations (version BIGINT);");
+			client.query("create table schema_migrations (version VARCHAR(17));");
 			return main();
 		});
 	}
