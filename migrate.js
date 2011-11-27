@@ -617,28 +617,36 @@ function create() {
 		
 	var name = process.argv[3];
 
+	function pad(number, length) {
+	   var str = '' + number;
+	   while (str.length < length) {
+	       str = '0' + str;
+	   }
+	   return str;
+	}
 	//Get current date for the filename time stamp
     var date = new Date();
-	var current_year = date.getFullYear();
-	var current_month = date.getMonth();
-	var current_date = date.getDate();
-	var current_hours = date.getHours();
-	var current_minutes = date.getMinutes();
-	var current_seconds = date.getSeconds();
-	var current_miliseconds = date.getMilliseconds();
+	var current_year = date.getUTCFullYear();
+	var current_month = date.getUTCMonth()+1;
+	var current_date = date.getUTCDate();
+	var current_hours = date.getUTCHours();
+	var current_minutes = date.getUTCMinutes();
+	var current_seconds = date.getUTCSeconds();
+	var current_miliseconds = date.getUTCMilliseconds();
+
 	var date_string = current_year+''
-					  +current_month+''
-					  +current_date+''
-					  +current_hours+''
-					  +current_minutes+''
-					  +current_seconds+''
-					  +current_miliseconds;
+					  +pad(current_month, 2)+''
+					  +pad(current_date, 2)+''
+					  +pad(current_hours, 2)+''
+					  +pad(current_minutes, 2)+''
+					  +pad(current_seconds, 2)+''
+					  +pad(current_miliseconds, 3);
 
 	var filename = config.migration_path.replace(/[\/\s]+$/,"") + "/" + date_string + "_" + name + ".js";
 	fs.writeFile(filename, migration_template.replace(/%name/,name), function(error) {
 		if (error) exit(error);
 		exit("Created migration: " + filename);
-	});
+	});	
 }
 
 /** 
