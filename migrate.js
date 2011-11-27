@@ -634,13 +634,13 @@ function create() {
 	var current_seconds = date.getUTCSeconds();
 	var current_miliseconds = date.getUTCMilliseconds();
 
-	var date_string = current_year+''
-					  +pad(current_month, 2)+''
-					  +pad(current_date, 2)+''
-					  +pad(current_hours, 2)+''
-					  +pad(current_minutes, 2)+''
-					  +pad(current_seconds, 2)+''
-					  +pad(current_miliseconds, 3);
+	var date_string = current_year+''+
+					  pad(current_month, 2)+''+
+					  pad(current_date, 2)+''+
+					  pad(current_hours, 2)+''+
+					  pad(current_minutes, 2)+''+
+					  pad(current_seconds, 2)+''+
+					  pad(current_miliseconds, 3);
 
 	var filename = config.migration_path.replace(/[\/\s]+$/,"") + "/" + date_string + "_" + name + ".js";
 	fs.writeFile(filename, migration_template.replace(/%name/,name), function(error) {
