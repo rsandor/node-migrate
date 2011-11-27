@@ -611,16 +611,33 @@ function exit(msg) {
  * Creates a new migration.
  */
 function create() {
-	if (!process.argv[3])
+	if (!process.argv[3]) {
 		exit("You must provide a name for the migration.");
+	}
+		
 	var name = process.argv[3];
 
+	//Get current date for the filename time stamp
     var date = new Date();
-	var filename = config.migration_path.replace(/[\/\s]+$/,"") + "/" + 
-	  date.getTime().toString().replace(/\s+$/,"") + "_" + name + ".js";
+	var current_year = date.getFullYear();
+	var current_month = date.getMonth();
+	var current_date = date.getDate();
+	var current_hours = date.getHours();
+	var current_minutes = date.getMinutes();
+	var current_seconds = date.getSeconds();
+	var current_miliseconds = date.getMilliseconds();
+	var date_string = current_year+''
+					  +current_month+''
+					  +current_date+''
+					  +current_hours+''
+					  +current_minutes+''
+					  +current_seconds+''
+					  +current_miliseconds;
+
+	var filename = config.migration_path.replace(/[\/\s]+$/,"") + "/" + date_string + "_" + name + ".js";
 	fs.writeFile(filename, migration_template.replace(/%name/,name), function(error) {
 		if (error) exit(error);
-		exit("Created migration " + filename);
+		exit("Created migration: " + filename);
 	});
 }
 
