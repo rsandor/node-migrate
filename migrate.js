@@ -77,18 +77,20 @@ function CreateTable(name) {
       default_value: null
     };
     
-    if (arguments.length < 1)
+    if (arguments.length == 0) {
       return;
+    }
     
     if (typeof arguments[0] == "string") {
-      if (arguments.length < 2)
-        return;
-      
       column.name = arguments[0];
-      column.type = arguments[1];
-      
-      if (arguments[2] && typeof(arguments[2]) == "object")
-        column = merge(column, arguments[2]);
+
+      if (arguments.length > 1) {
+        column.type = arguments[1];
+        
+        if (arguments[2] && typeof(arguments[2]) == "object") {
+          column = merge(column, arguments[2]);
+        }
+      }
     }
     else if (typeof arguments[0] == 'object') {
       column = merge(column, arguments[0]);
@@ -100,8 +102,8 @@ function CreateTable(name) {
     }
     
     if (!valid_type(column.type))
-      return;
-      
+      return column;
+    
     this.columns.push(column);
   };
 
@@ -165,7 +167,7 @@ function RenameTable(old_name, new_name) {
  */
 function ChangeTable(name) {
   CreateTable.call(this, name);
-  
+
   this.remove_columns = [];
   this.change_columns = [];
   this.remove_indices = [];
@@ -176,8 +178,7 @@ function ChangeTable(name) {
    * Alters a column and renames it.
    */
   this.rename = function(old_name, new_column) {
-    this.column(new_column);
-    this.rename_columns[old_name] = this.columns.pop();
+    this.rename_columns[old_name] = this.column(new_column);
   };
   
   /**
@@ -286,7 +287,10 @@ function Migration(opts) {
     
   // Encodes an object and appends it to the migrations SQL representation.
   function encode(o) {
-    sql += encoder.encode(o);
+    var encoding = encoder.encode(o);
+    if(encoding) {
+      sql += encoding;
+    }
   }
   
   function reset() {
@@ -563,8 +567,183 @@ Encoders['mysql'] = function() {
   };
 }();
 
+/**
+ * Translates migrations into valid SQLite 3.
+ */
+Encoders['sqlite3'] = function() {
+  // Mapping of abstract migrate types to concrete SQLite 3 types
+  var types = {
+    'integer': 'INT',
+    'string': 'VARCHAR',
+    'text': 'TEXT',
+    'float': 'FLOAT',
+    'decimal': 'DECIMAL',
+    'datetime': 'DATETIME',
+    'timestamp': 'TIMESTAMP',
+    'time': 'TIME',
+    'date': 'DATE',
+    'binary': 'VARBINARY',
+    'boolean': 'TINYINT'
+  };
+   
+  // Intensely helpful function for creating a SQLite type from a column object.
+  function parse_type(column) {
+    // type, limit, precision, scale
+    var type = null;
+    
+    if (column.type == 'integer') {
+      if (column.limit == 1)
+        type = "TINYINT";
+      else if (column.limit == 2)
+        type = "SMALLINT";
+      else if (column.limit == 3)
+        type = "MEDIUMINT";
+      else if (column.limit == 8)
+        type = "BIGINT";
+      else
+        type = "INT";
+    }
+    else if (column.type == 'string' || column.type == 'binary') {
+      type = types[column.type];
+      if (column.limit)
+        type += "(" + column.limit + ")";
+      else
+        type += '(255)';
+    }
+    else if (column.type == 'decimal') {
+      type = types[column.type];
+      if (column.precision && column.scale) {
+        type += "(" + column.precision + "," + column.scale + ")";
+      }
+      else if (column.precision) {
+        type += "(" + column.precision + ")";
+      }
+    }
+    else 
+      type = types[column.type];
+    
+    if (column.not_null)
+      type += ' NOT NULL';
+    
+    if (column.default_value) {
+      type += ' DEFAULT ';
+      if (column.type == 'string' || column.type == 'text')
+        type += "'" + column.default_value + "'";
+      else
+        type += column.default_value;
+    }
+    
+    return type;
+  }
+  
+  /*
+   * The following functions do the the actual work of generating the SQL for the encode function.
+   */
+  function create_table(table) {
+    var sql = "CREATE TABLE " + table.name, defs = [], i;
+    
+    for (i = 0; i < table.columns.length; i++)
+      defs.push("\t" + table.columns[i].name + " " + parse_type(table.columns[i]));
+
+    if (table.primary_key_name)
+      defs.push("\tPRIMARY KEY (" + table.primary_key_name + ")");
+
+    if (defs.length)
+      sql += " (\n" + defs.join(",\n") + "\n)";
+    
+    sql += ";\n";
+  
+    for (i = 0; i < table.indices.length; i++)
+      sql += "\tCREATE INDEX IF NOT EXISTS ix_" + table.name + "_" + table.indices[i] + " ON " + table.name + "(" + table.indices[i] + ");";
+
+    return sql;
+  }
+  
+  function drop_table(table) {
+    return "DROP TABLE " + table.name + ";\n";
+  }
+  
+  function rename_table(table) {
+    return "ALTER TABLE " + table.old_name + " RENAME TO " + table.new_name + ";\n";
+  }
+  
+  function change_table(table) {
+    if(table.primary_key_name || table.remove_columns.length || table.remove_key || table.change_columns.length || table.rename_columns.length) {
+      return exit('You can only add columns to tables in a change_table migration.');
+    }
+
+    var sql = "ALTER TABLE " + table.name, defs = [], i;
+    
+    for (i = 0; i < table.columns.length; i++)
+      defs.push("\tADD COLUMN " + table.columns[i].name + " " + parse_type(table.columns[i]));
+    
+    if (defs.length)
+      sql += "\n" + defs.join(",\n") + ";";
+    
+    for (i = 0; i < table.indices.length; i++)
+      sql += "\nCREATE INDEX IF NOT EXISTS ix_" + table.name + "_" + table.indices[i] + " ON " + table.name + "(" + table.indices[i] + ");";
+
+    for (i = 0; i < table.remove_indices.length; i++)
+      sql += "\nDROP INDEX IF EXISTS ix_" + table.name + "_" + table.remove_indices[i] + " ON " + table.name + "(" + table.remove_indices[i] + ");";
+
+    return sql;
+  }
+  
+  function add_column(column) {
+    return "ALTER TABLE " + column.table_name + " ADD COLUMN " + 
+      column.name + " " + parse_type(column) + ";\n";
+  }
+  
+  function rename_column(column) {
+      return exit('You can only add columns to tables in a change_table migration.');
+  }
+  
+  function change_column(column) {
+      return exit('You can only add columns to tables in a change_table migration.');
+  }
+  
+  function remove_column(column) {
+      return exit('You can only add columns to tables in a change_table migration.');
+  }
+  
+  function add_index(index) {
+    return "CREATE INDEX IF NOT EXISTS ix_" + index.table_name + "_" + index.name + " ON " + index.table_name + "(" + index.name + ");";
+  }
+  
+  function remove_index(index) {
+    return "DROP INDEX IF EXISTS ix_" + index.table_name + "_" + index.name + " ON " + index.table_name + "(" + index.name + ");";
+  }
+  
+  return {
+    encode: function(o) {
+      if (o instanceof ChangeTable)
+        return change_table(o);
+      else if (o instanceof CreateTable)
+        return create_table(o);
+      else if (o instanceof DropTable)
+        return drop_table(o);
+      else if (o instanceof RenameTable)
+        return rename_table(o);
+      else if (o instanceof AddColumn)
+        return add_column(o);
+      else if (o instanceof RenameColumn)
+        return rename_column(o);
+      else if (o instanceof ChangeColumn)
+        return change_column(o);
+      else if (o instanceof RemoveColumn)
+        return remove_column(o);
+      else if (o instanceof AddIndex)
+        return add_index(o);
+      else if (o instanceof RemoveIndex)
+        return remove_index(o);
+      else
+        throw "Error: SQLite 3 Encoder Encountered Unknown Rule Type.";
+    }
+  };
+}();
+
 // The real "beef" is here, this section handles the command-line usage of the module.
-var sys = require('sys'),
+var sys = require('util'),
   exec = require('child_process').exec,
   fs = require('fs'),
   config = require('./config');
@@ -827,6 +1006,31 @@ var Connect = {
       client.query("create table schema_migrations (version BIGINT);");
       return main();
     });
+  },
+  sqlite3: function() {
+    var sqlite3 = require("sqlite3");
+    if(config.sqlite3.verbose) {
+      sqlite3.verbose();
+    }
+    client = new sqlite3.Database(config.sqlite3.filename, function(err) {
+      if(err) {
+        return exit(err);
+      }
+      client.get("select name from sqlite_master where type=? and name=?;", "table", "schema_migrations", function(err, row) {
+        if(row) {
+          return main();
+        }
+        sys.puts("Creating migration table.");
+        client.run("create table schema_migrations(version BIGINT);", function(err) {
+          if(err) {
+            return exit(err);
+          }
+          return main();
+        });
+      });
+    });
+    client.end = function() {client = null;};
+    client.query = client.all;
   }
 };
 
