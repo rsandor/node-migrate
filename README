@@ -3,6 +3,8 @@ Migrate - A database agnostic migration system for Node.js
 
 By Ryan Sandor Richards
 
+SQLite 3 Contribution by Curtis Schlak
+
 Introduction
 --------------------------------------------------------------------------------
 Migrate is a tool that allows you to define database schema migrations with
@@ -14,9 +16,10 @@ Requirements
 --------------------------------------------------------------------------------
 1. Node.js - http://github.com/ry/node
 2. node-mysql - https://github.com/felixge/node-mysql
+3. node-sqlite3 - https://github.com/developmentseed/node-sqlite3
 
-Please note that at the current time we only support MySQL but other DBMS' are
-on their way (next up: Postgres).
+Please note that at the current time we only support MySQL and SQLite 3 but
+other DBMS' are on their way (next up: Postgres).
 
 Installation
 --------------------------------------------------------------------------------
@@ -31,12 +34,14 @@ the directory where the migrate.js file resides.
 The configuration file has the following keys:
 
 * `dbms` - The database management system to use (currently we only support a
-  a value of `'mysql'`).
+  a value of either `'mysql'` or `'sqlite3'`).
 * `migration_path` - Relative path to the directory in which migrations are
   stored.
 * `mysql` - Just a simple client configuration for mysql. Fill out your username,
   password, and any other information needed to connect to the database via
   node-mysql's `Client` class.
+* `sqlite3` - Just a simple client configuration for SQLite 3. Fill out the
+  filename for the database to which you would like to connect.
 
 How do I use migrate?
 --------------------------------------------------------------------------------
@@ -258,8 +263,8 @@ Producing SQL:
 Outtro
 --------------------------------------------------------------------------------
 So that about sums it up. Simple and easy ;). It's a very early alpha version so
-please don't hate on only having MySQL support! If you have a feature request 
-feel free to send me a message and I'll try to get it in ASAP.
+please don't hate on only having MySQL and SQLite 3 support! If you have a
+feature request feel free to send me a message and I'll try to get it in ASAP.
 
 Thanks!
 
