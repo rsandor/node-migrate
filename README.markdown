@@ -75,6 +75,7 @@ What is a migration?
 A migration is a programmatic way of defining incremental database schema 
 changes. It has an "up" method for describing how to apply the changes, and a 
 "down" method for removing them. Here is an example migration:
+
     var create_users_table = new Migration({
       up: function() {
         this.create_table('users', function(t) {
@@ -88,6 +89,7 @@ changes. It has an "up" method for describing how to apply the changes, and a
         this.drop_table('users');
       }
     });
+    
 In the above migration the "up" function creates a table named "users" with
 three fields (id, email, and password) and a primary key on id. The "down"
 function reverses these changes and simply drops the entire "users" table.
@@ -127,6 +129,7 @@ and options are as explained in the `t.column` method. Here's a complete list:
   `date`, `binary`, `boolean`
   
 Example:
+
     this.create_table('high_scores', function(t) {
         t.integer('id');
         t.string('name', {limit: 32});
@@ -135,7 +138,9 @@ Example:
         t.primary_key('id');
         t.index('name');
     }); 
+    
 Producing SQL:
+
     CREATE TABLE high_scores (
         id INT,
         name VARCHAR(32),
@@ -175,6 +180,7 @@ modify existing tables and adds the following functionality to body method:
 * `t.remove_primary_key()` - Removes a primary key from the table.
 
 Example:
+
     this.change_table('all_time_high_scores', function(t) {
       t.remove_index('name');
       t.remove_primary_key();
@@ -187,7 +193,9 @@ Example:
       });
       t.change('name', 'string' {limit: 128});
     });
+    
 Producing SQL:
+
     ALTER TABLE all_time_high_scores
       DROP INDEX (name),
       DROP PRIMARY KEY,
@@ -207,13 +215,16 @@ Producing SQL:
 
 ### rename_column(table_name, column_name, new_column)
 Renames and modifies a column in a table. Example:
+
     this.rename('all_time_high_scores', 'high_score', {
       name: 'score',
       type: 'integer',
       limit: 8
     });
+    
 Producing SQL:
-    ALTER TABLE all_time_high_scores CHANGE COLUMN high_score score BIGINT;
+
+`ALTER TABLE all_time_high_scores CHANGE COLUMN high_score score BIGINT;`
 
 ### change_column(table_name, column_name, type, options)
 Changes a column's definition. Example:
