@@ -74,7 +74,8 @@ function CreateTable(name) {
       not_null: null,
       precision: null,
       scale: null,
-      default_value: null
+      default_value: null,
+      auto_increment: null
     };
     
     if (arguments.length == 0) {
@@ -434,6 +435,10 @@ Encoders['mysql'] = function() {
     
     if (column.not_null)
       type += ' NOT NULL';
+    
+    if (column.auto_increment) {
+      type += ' AUTO_INCREMENT';
+    }
     
     if (column.default_value) {
       type += ' DEFAULT ';
