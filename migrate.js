@@ -986,7 +986,7 @@ function main() {
 var Connect = {
   mysql: function() {
     // Create the client
-    client = new require('mysql').createClient(config.mysql);
+    client = new require('mysql').createConnection(config.mysql);
     
     client.query("show tables;", function(err, result, fields) {
       if (err) 
